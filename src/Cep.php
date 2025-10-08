@@ -2,10 +2,10 @@
 
 namespace Leandrocfe\FilamentPtbrFormFields;
 
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Component;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Set;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
@@ -19,16 +19,18 @@ class Cep extends TextInput
 
             $livewire->validateOnly($component->getKey());
 
-            $request = Http::get(config('filament-ptbr-form-fields.viacep_url').$state.'/json/')->json();
+            if ($state) {
+                $request = Http::get(config('filament-ptbr-form-fields.viacep_url').$state.'/json/')->json();
 
-            foreach ($setFields as $key => $value) {
-                $set($key, $request[$value] ?? null);
-            }
+                foreach ($setFields as $key => $value) {
+                    $set($key, $request[$value] ?? null);
+                }
 
-            if (blank($request) || Arr::has($request, 'erro')) {
-                throw ValidationException::withMessages([
-                    $component->getKey() => $errorMessage,
-                ]);
+                if (blank($request) || Arr::has($request, 'erro')) {
+                    throw ValidationException::withMessages([
+                        $component->getKey() => $errorMessage,
+                    ]);
+                }
             }
         };
 
