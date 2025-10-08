@@ -10,48 +10,38 @@ use Leandrocfe\FilamentPtbrFormFields\Providers\CepProviderInterface;
 use Leandrocfe\FilamentPtbrFormFields\Providers\ViaCepProvider;
 
 /**
- * Brazilian ZIP code (CEP) form field component.
- *
- * Enables automatic address lookup through CEP providers (ViaCep, BrasilAPI, etc).
+ * Brazilian ZIP code (CEP) field with automatic address lookup.
  */
 class Cep extends TextInput
 {
     use HasCepModes;
 
-    protected null|string|Htmlable $defaultErrorMessage = 'CEP inválido';
+    protected null|string|Htmlable $errorMessage = 'CEP inválido';
 
-    /**
-     * Initial field configuration.
-     */
     protected function setUp(): void
     {
         parent::setUp();
 
         $this
-            ->required()
             ->minLength(9)
             ->mask('99999-999')
             ->placeholder('00000-000');
     }
 
-    public function defaultErrorMessage(null|string|Htmlable $message): static
+    public function errorMessage(null|string|Htmlable $message): static
     {
-        $this->defaultErrorMessage = $message ?? $this->defaultErrorMessage;
+        $this->errorMessage = $message;
+
         return $this;
     }
 
-    public function getDefaultErrorMessage(): null|string|Htmlable
+    public function getErrorMessage(): null|string|Htmlable
     {
-        return $this->defaultErrorMessage;
+        return $this->errorMessage;
     }
 
     /**
-     * Configure the API provider for CEP lookup.
-     *
-     * @param  string|CepProviderInterface  $provider  Provider class name or instance
-     * @param  callable  $callback  Callback function that receives ($set, $response) to populate fields
-     *
-     * @throws InvalidArgumentException If the provider doesn't implement CepProviderInterface
+     * Configure the CEP provider and callback.
      */
     public function api(string|CepProviderInterface $provider, callable $callback): static
     {
@@ -62,11 +52,6 @@ class Cep extends TextInput
         return $this;
     }
 
-    /**
-     * Resolve the provider to a valid instance.
-     *
-     * @throws InvalidArgumentException If the provider doesn't implement CepProviderInterface
-     */
     private function resolveProvider(string|CepProviderInterface $provider): CepProviderInterface
     {
         $providerInstance = is_string($provider) ? new $provider : $provider;

@@ -228,42 +228,115 @@ Money::make('price')
 ->prefix('€')
 ```
 
-### Address
+### CEP (Brazilian ZIP Code)
 
-To integrate with the ViaCep API for CEP validation and address autofill, use:
+The CEP field provides automatic address lookup through configurable providers like ViaCep and BrasilAPI.
+
+#### Basic Usage
 
 ```php
 use Leandrocfe\FilamentPtbrFormFields\Cep;
+use Leandrocfe\FilamentPtbrFormFields\CepFieldMode;
+use Leandrocfe\FilamentPtbrFormFields\Providers\ViaCepProvider;
 use Filament\Forms\Components\TextInput;
-Cep::make('postal_code')
-    ->viaCep(
-        mode: 'suffix', // Determines whether the action should be appended to (suffix) or prepended to (prefix) the cep field, or not included at all (none).
-        errorMessage: 'CEP inválido.', // Error message to display if the CEP is invalid.
 
-        /**
-         * Other form fields that can be filled by ViaCep.
-         * The key is the name of the Filament input, and the value is the ViaCep attribute that corresponds to it.
-         * More information: https://viacep.com.br/
-         */
-        setFields: [
-            'street' => 'logradouro',
-            'number' => 'numero',
-            'complement' => 'complemento',
-            'district' => 'bairro',
-            'city' => 'localidade',
-            'state' => 'uf'
-        ]
-    ),
+Cep::make('cep')
+    ->mode(CepFieldMode::SUFFIX) // or CepFieldMode::ON_BLUR
+    ->api(ViaCepProvider::class, function ($set, $response) {
+        $set('street', $response['logradouro'] ?? null);
+        $set('neighborhood', $response['bairro'] ?? null);
+        $set('city', $response['localidade'] ?? null);
+        $set('state', $response['uf'] ?? null);
+    }),
 
 TextInput::make('street'),
-TextInput::make('number'),
-TextInput::make('complement'),
-TextInput::make('district'),
+TextInput::make('neighborhood'),
 TextInput::make('city'),
 TextInput::make('state'),
 ```
 
-The mode parameter specifies whether the search action should be appended to or prepended to the CEP field, using the values suffix or prefix. Alternatively, you can use the none value with the `->live(onBlur: true)` method to indicate that the other address fields will be automatically filled only when the CEP field loses focus.
+#### Lookup Modes
+
+**ON_BLUR (default)**: Automatically fetches address when the field loses focus
+```php
+Cep::make('cep')
+    ->mode(CepFieldMode::ON_BLUR)
+    ->api(ViaCepProvider::class, function ($set, $response) {
+        // ...
+    })
+```
+
+**SUFFIX**: Shows a search button next to the field
+```php
+Cep::make('cep')
+    ->mode(CepFieldMode::SUFFIX)
+    ->api(ViaCepProvider::class, function ($set, $response) {
+        // ...
+    })
+```
+
+#### Custom Error Message
+
+```php
+Cep::make('cep')
+    ->errorMessage('Invalid CEP')
+    ->api(ViaCepProvider::class, function ($set, $response) {
+        // ...
+    })
+```
+
+#### Available Providers
+
+- **ViaCepProvider**: Default provider using [ViaCep API](https://viacep.com.br/)
+- **BrasilApiProvider**: Alternative provider using [BrasilAPI](https://brasilapi.com.br/)
+
+```php
+use Leandrocfe\FilamentPtbrFormFields\Providers\BrasilApiProvider;
+
+Cep::make('cep')
+    ->api(BrasilApiProvider::class, function ($set, $response) {
+        $set('street', $response['street'] ?? null);
+        $set('neighborhood', $response['neighborhood'] ?? null);
+        $set('city', $response['city'] ?? null);
+        $set('state', $response['state'] ?? null);
+    })
+```
+
+#### Custom Provider
+
+You can create your own provider by implementing `CepProviderInterface`:
+
+```php
+use Leandrocfe\FilamentPtbrFormFields\Providers\CepProviderInterface;
+use Illuminate\Support\Collection;
+
+class MyCustomProvider implements CepProviderInterface
+{
+    public function fetch(string $cep): null|Collection|array
+    {
+        // Your implementation
+        return $response;
+    }
+}
+```
+
+#### Legacy Method (Deprecated)
+
+The old `viaCep()` method is still available for backward compatibility but will be removed in v5.0:
+
+```php
+Cep::make('postal_code')
+    ->viaCep(
+        mode: 'suffix',
+        errorMessage: 'CEP inválido.',
+        setFields: [
+            'street' => 'logradouro',
+            'district' => 'bairro',
+            'city' => 'localidade',
+            'state' => 'uf'
+        ]
+    )
+```
 
 ## Testing
 
