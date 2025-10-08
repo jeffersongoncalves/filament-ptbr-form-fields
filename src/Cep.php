@@ -45,13 +45,34 @@ class Cep extends TextInput
     {
         return match ($this->getMode()) {
             default => $this,
-            CepFieldMode::ON_BLUR => $this
-                ->live(onBlur: true)
-                ->afterStateUpdated(function (?string $state, Set $set, Livewire $livewire) use ($providerInstance, $callback) {
-                    $response = $this->providerSendRequest($state, $providerInstance);
-                    $callback($set, $response);
-                }),
+            CepFieldMode::ON_BLUR => $this->getOnBlurMode($providerInstance, $callback),
+            CepFieldMode::SUFFIX => $this->getSuffixMode($providerInstance, $callback),
         };
+    }
+
+    protected function getOnBlurMode(CepProviderInterface $providerInstance, callable $callback): static
+    {
+        return $this
+            ->live(onBlur: true)
+            ->afterStateUpdated(function (?string $state, Set $set) use ($providerInstance, $callback) {
+                $response = $this->providerSendRequest($state, $providerInstance);
+                $callback($set, $response);
+            });
+    }
+
+    protected function getSuffixMode(CepProviderInterface $providerInstance, callable $callback): static
+    {
+        return $this
+            ->suffixAction(function () use ($providerInstance, $callback) {
+                return Action::make('search-action')
+                    ->label('Buscar CEP')
+                    ->icon('heroicon-o-magnifying-glass')
+                    ->action(function (?string $state, Set $set) use ($providerInstance, $callback) {
+                        $response = $this->providerSendRequest($state, $providerInstance);
+                        $callback($set, $response);
+                    })
+                    ->cancelParentActions();
+            });
     }
 
     public function api(string|CepProviderInterface $provider, callable $callback): static
