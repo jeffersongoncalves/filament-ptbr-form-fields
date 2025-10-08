@@ -3,6 +3,7 @@
 namespace Leandrocfe\FilamentPtbrFormFields;
 
 use Filament\Forms\Components\TextInput;
+use Illuminate\Contracts\Support\Htmlable;
 use InvalidArgumentException;
 use Leandrocfe\FilamentPtbrFormFields\Concerns\HasCepModes;
 use Leandrocfe\FilamentPtbrFormFields\Providers\CepProviderInterface;
@@ -12,11 +13,12 @@ use Leandrocfe\FilamentPtbrFormFields\Providers\ViaCepProvider;
  * Brazilian ZIP code (CEP) form field component.
  *
  * Enables automatic address lookup through CEP providers (ViaCep, BrasilAPI, etc).
- *
  */
 class Cep extends TextInput
 {
     use HasCepModes;
+
+    protected null|string|Htmlable $defaultErrorMessage = 'CEP inválido';
 
     /**
      * Initial field configuration.
@@ -26,9 +28,21 @@ class Cep extends TextInput
         parent::setUp();
 
         $this
+            ->required()
             ->minLength(9)
             ->mask('99999-999')
             ->placeholder('00000-000');
+    }
+
+    public function defaultErrorMessage(null|string|Htmlable $message): static
+    {
+        $this->defaultErrorMessage = $message ?? $this->defaultErrorMessage;
+        return $this;
+    }
+
+    public function getDefaultErrorMessage(): null|string|Htmlable
+    {
+        return $this->defaultErrorMessage;
     }
 
     /**
@@ -38,7 +52,6 @@ class Cep extends TextInput
      * @param  callable  $callback  Callback function that receives ($set, $response) to populate fields
      *
      * @throws InvalidArgumentException If the provider doesn't implement CepProviderInterface
-     *
      */
     public function api(string|CepProviderInterface $provider, callable $callback): static
     {

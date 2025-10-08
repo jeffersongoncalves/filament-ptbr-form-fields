@@ -3,10 +3,13 @@
 namespace Leandrocfe\FilamentPtbrFormFields\Concerns;
 
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\HtmlString;
 use Leandrocfe\FilamentPtbrFormFields\CepFieldMode;
 use Leandrocfe\FilamentPtbrFormFields\Providers\CepProviderInterface;
+use Livewire\Component;
 
 trait HasCepModes
 {
@@ -49,8 +52,16 @@ trait HasCepModes
     {
         return $this
             ->live(onBlur: true)
-            ->afterStateUpdated(function (?string $state, Set $set) use ($provider, $callback) {
+            ->afterStateUpdated(function (?string $state, Set $set, TextInput $component, Component $livewire) use ($provider, $callback) {
+
+                $livewire->validateOnly($component->getStatePath());
+
                 $response = $this->fetchCepData($state, $provider);
+
+                if (blank($response)) {
+                    $livewire->addError($component->getStatePath(), $this->getDefaultErrorMessage());
+                }
+
                 $callback($set, $response);
             });
     }
@@ -64,8 +75,16 @@ trait HasCepModes
             ->suffixAction(function () use ($provider, $callback) {
                 return Action::make('searchCep')
                     ->icon(Heroicon::OutlinedMagnifyingGlass)
-                    ->action(function (?string $state, Set $set) use ($provider, $callback) {
+                    ->action(function (?string $state, Set $set, TextInput $component, Component $livewire) use ($provider, $callback) {
+
+                        $livewire->validateOnly($component->getStatePath());
+
                         $response = $this->fetchCepData($state, $provider);
+
+                        if (blank($response)) {
+                            $livewire->addError($component->getStatePath(), $this->getDefaultErrorMessage());
+                        }
+
                         $callback($set, $response);
                     })
                     ->cancelParentActions();
@@ -82,5 +101,10 @@ trait HasCepModes
         }
 
         return $provider->fetch($cep);
+    }
+
+    protected function validateCep(string $cep, Component $livewire, TextInput $component): bool
+    {
+        dd($cep, $livewire, $component);
     }
 }
