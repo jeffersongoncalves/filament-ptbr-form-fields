@@ -2,125 +2,75 @@
 
 namespace Leandrocfe\FilamentPtbrFormFields;
 
-use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Utilities\Set;
-use Illuminate\Support\Collection;
+use InvalidArgumentException;
+use Leandrocfe\FilamentPtbrFormFields\Concerns\HasCepModes;
 use Leandrocfe\FilamentPtbrFormFields\Providers\CepProviderInterface;
 use Leandrocfe\FilamentPtbrFormFields\Providers\ViaCepProvider;
-use Livewire\Component as Livewire;
 
+/**
+ * Brazilian ZIP code (CEP) form field component.
+ *
+ * Enables automatic address lookup through CEP providers (ViaCep, BrasilAPI, etc).
+ *
+ */
 class Cep extends TextInput
 {
+    use HasCepModes;
+
+    /**
+     * Initial field configuration.
+     */
     protected function setUp(): void
     {
         parent::setUp();
+
         $this
             ->minLength(9)
             ->mask('99999-999')
             ->placeholder('00000-000');
     }
 
-    protected CepFieldMode $mode = CepFieldMode::ON_BLUR;
-
-    public function mode(CepFieldMode $mode): static
+    /**
+     * Configure the API provider for CEP lookup.
+     *
+     * @param  string|CepProviderInterface  $provider  Provider class name or instance
+     * @param  callable  $callback  Callback function that receives ($set, $response) to populate fields
+     *
+     * @throws InvalidArgumentException If the provider doesn't implement CepProviderInterface
+     *
+     */
+    public function api(string|CepProviderInterface $provider, callable $callback): static
     {
-        $this->mode = $mode;
+        $providerInstance = $this->resolveProvider($provider);
+
+        $this->configureFieldMode($providerInstance, $callback);
 
         return $this;
     }
 
-    public function getMode(): CepFieldMode
-    {
-        return $this->mode;
-    }
-
-    protected function providerSendRequest(string $state, CepProviderInterface $providerInstance): null|Collection|array
-    {
-        return $providerInstance->fetch($state);
-    }
-
-    protected function getConfiguredField(CepProviderInterface $providerInstance, callable $callback): static
-    {
-        return match ($this->getMode()) {
-            default => $this,
-            CepFieldMode::ON_BLUR => $this->getOnBlurMode($providerInstance, $callback),
-            CepFieldMode::SUFFIX => $this->getSuffixMode($providerInstance, $callback),
-        };
-    }
-
-    protected function getOnBlurMode(CepProviderInterface $providerInstance, callable $callback): static
-    {
-        return $this
-            ->live(onBlur: true)
-            ->afterStateUpdated(function (?string $state, Set $set) use ($providerInstance, $callback) {
-                $response = $this->providerSendRequest($state, $providerInstance);
-                $callback($set, $response);
-            });
-    }
-
-    protected function getSuffixMode(CepProviderInterface $providerInstance, callable $callback): static
-    {
-        return $this
-            ->suffixAction(function () use ($providerInstance, $callback) {
-                return Action::make('search-action')
-                    ->label('Buscar CEP')
-                    ->icon('heroicon-o-magnifying-glass')
-                    ->action(function (?string $state, Set $set) use ($providerInstance, $callback) {
-                        $response = $this->providerSendRequest($state, $providerInstance);
-                        $callback($set, $response);
-                    })
-                    ->cancelParentActions();
-            });
-    }
-
-    public function api(string|CepProviderInterface $provider, callable $callback): static
+    /**
+     * Resolve the provider to a valid instance.
+     *
+     * @throws InvalidArgumentException If the provider doesn't implement CepProviderInterface
+     */
+    private function resolveProvider(string|CepProviderInterface $provider): CepProviderInterface
     {
         $providerInstance = is_string($provider) ? new $provider : $provider;
 
         if (! $providerInstance instanceof CepProviderInterface) {
-            throw new \InvalidArgumentException('The provider must implement the CepProviderInterface interface.');
+            throw new InvalidArgumentException(
+                'The provider must implement the CepProviderInterface interface.'
+            );
         }
 
-        $this->getConfiguredField($providerInstance, $callback);
-
-        return $this;
-
-        //        $this
-        //            ->minLength(9)
-        //            ->mask('99999-999')
-        //            ->afterStateUpdated(function ($state, Livewire $livewire, Set $set, Component $component) use ($errorMessage, $cepRequest) {
-        //                $cepRequest($state, $livewire, $set, $component, $errorMessage);
-        //            })
-        //            ->suffixAction(function () use ($mode, $errorMessage, $cepRequest) {
-        //                if ($mode === 'suffix') {
-        //                    return Action::make('search-action')
-        //                        ->label('Buscar CEP')
-        //                        ->icon('heroicon-o-magnifying-glass')
-        //                        ->action(function ($state, Livewire $livewire, Set $set, Component $component) use ($errorMessage, $cepRequest) {
-        //                            $cepRequest($state, $livewire, $set, $component, $errorMessage);
-        //                        })
-        //                        ->cancelParentActions();
-        //                }
-        //            })
-        //            ->prefixAction(function () use ($mode, $errorMessage, $cepRequest) {
-        //                if ($mode === 'prefix') {
-        //                    return Action::make('search-action')
-        //                        ->label('Buscar CEP')
-        //                        ->icon('heroicon-o-magnifying-glass')
-        //                        ->action(function ($state, Livewire $livewire, Set $set, Component $component) use ($errorMessage, $cepRequest) {
-        //                            $cepRequest($state, $livewire, $set, $component, $errorMessage);
-        //                        })
-        //                        ->cancelParentActions();
-        //                }
-        //            });
-        //
-        //        return $this;
+        return $providerInstance;
     }
 
     /**
-     * @deprecated Use api() method instead. Will be removed in v5.0
+     * Legacy method for backward compatibility.
+     *
+     * @deprecated Use api() method instead.
      */
     public function viaCep(string $mode = 'suffix', string $errorMessage = 'CEP inválido.', array $setFields = []): static
     {
