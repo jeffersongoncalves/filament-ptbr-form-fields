@@ -23,8 +23,11 @@ class Money extends TextInput
         $this
             ->currency()
             ->prefix('R$')
-            ->extraAlpineAttributes(fn () => $this->getOnKeyPress())
-            ->extraAlpineAttributes(fn () => $this->getOnKeyUp())
+            ->extraAlpineAttributes(fn () => [
+                ...$this->getOnKeyPress(),
+                ...$this->getOnKeyUp(),
+                ...$this->getOnBlur(),
+            ])
             ->formatStateUsing(fn ($state) => $this->hydrateCurrency($state))
             ->dehydrateStateUsing(fn ($state) => $this->dehydrateCurrency($state));
     }
@@ -115,6 +118,15 @@ class Money extends TextInput
         return [
             'x-on:keyup' => 'function() {
                 $el.value = Currency.masking($el.value, {locales:\''.$numberFormatter.'\'});
+            }',
+        ];
+    }
+
+    protected function getOnBlur(): array
+    {
+        return [
+            'x-on:blur' => 'function() {
+                $wire.set(\''.$this->getStatePath().'\', $el.value);
             }',
         ];
     }
