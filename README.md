@@ -320,10 +320,11 @@ class MyCustomProvider implements CepProviderInterface
 
 #### Legacy Method (Deprecated)
 
-The old `viaCep()` method is still available for backward compatibility but will be removed in v5.0:
+The old `viaCep()` method is still available for backward compatibility but will be removed:
 
 ```php
 Cep::make('postal_code')
+    ->mode(CepFieldMode::SUFFIX)
     ->viaCep(
         mode: 'suffix',
         errorMessage: 'CEP inválido.',
