@@ -236,10 +236,11 @@ The CEP field provides automatic address lookup through configurable providers l
 #### Basic Usage
 
 ```php
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
 use Leandrocfe\FilamentPtbrFormFields\Cep;
 use Leandrocfe\FilamentPtbrFormFields\CepFieldMode;
 use Leandrocfe\FilamentPtbrFormFields\Providers\ViaCepProvider;
-use Filament\Forms\Components\TextInput;
 
 Cep::make('postal_code')
     ->mode(CepFieldMode::SUFFIX) // or CepFieldMode::ON_BLUR
