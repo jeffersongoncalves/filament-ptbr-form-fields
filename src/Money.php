@@ -124,8 +124,29 @@ class Money extends TextInput
 
     protected function getOnBlur(): array
     {
+        $currency = new ($this->getCurrency());
+        $numberFormatter = $currency->locale;
+
         return [
+            'x-init' => 'function() {
+                // Format on initialization
+                if ($el.value) {
+                    $el.value = Currency.masking($el.value, {locales:\''.$numberFormatter.'\'});
+                }
+
+                // Watch for Livewire updates (reactive fields)
+                $watch("state", (value) => {
+                    // Only reformat if the field is not currently focused
+                    // This prevents reformatting while the user is typing
+                    if (document.activeElement !== $el && value) {
+                        $el.value = Currency.masking(value, {locales:\''.$numberFormatter.'\'});
+                    }
+                });
+            }',
             'x-on:blur' => 'function() {
+                if ($el.value) {
+                    $el.value = Currency.masking($el.value, {locales:\''.$numberFormatter.'\'});
+                }
                 $wire.set(\''.$this->getStatePath().'\', $el.value);
             }',
         ];

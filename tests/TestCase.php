@@ -20,6 +20,9 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
+            \Livewire\LivewireServiceProvider::class,
+            \Filament\Support\SupportServiceProvider::class,
+            \Filament\Forms\FormsServiceProvider::class,
             FilamentPtbrFormFieldsServiceProvider::class,
         ];
     }
