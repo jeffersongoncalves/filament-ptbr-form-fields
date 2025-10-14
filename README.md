@@ -240,13 +240,13 @@ use Leandrocfe\FilamentPtbrFormFields\CepFieldMode;
 use Leandrocfe\FilamentPtbrFormFields\Providers\ViaCepProvider;
 use Filament\Forms\Components\TextInput;
 
-Cep::make('cep')
+Cep::make('postal_code')
     ->mode(CepFieldMode::SUFFIX) // or CepFieldMode::ON_BLUR
-    ->api(ViaCepProvider::class, function ($set, $response) {
-        $set('street', $response['logradouro'] ?? null);
-        $set('neighborhood', $response['bairro'] ?? null);
-        $set('city', $response['localidade'] ?? null);
-        $set('state', $response['uf'] ?? null);
+    ->api(ViaCepProvider::class, function (Set $set, ?array $response) {
+        $set('street', data_get($response, 'logradouro'));
+        $set('neighborhood', data_get($response, 'bairro'));
+        $set('city', data_get($response, 'localidade'));
+        $set('state', data_get($response, 'uf'));
     }),
 
 TextInput::make('street'),
@@ -259,18 +259,18 @@ TextInput::make('state'),
 
 **ON_BLUR (default)**: Automatically fetches address when the field loses focus
 ```php
-Cep::make('cep')
+Cep::make('postal_code')
     ->mode(CepFieldMode::ON_BLUR)
-    ->api(ViaCepProvider::class, function ($set, $response) {
+    ->api(ViaCepProvider::class, function (Set $set, ?array $response) {
         // ...
     })
 ```
 
 **SUFFIX**: Shows a search button next to the field
 ```php
-Cep::make('cep')
+Cep::make('postal_code')
     ->mode(CepFieldMode::SUFFIX)
-    ->api(ViaCepProvider::class, function ($set, $response) {
+    ->api(ViaCepProvider::class, function (Set $set, ?array $response) {
         // ...
     })
 ```
@@ -278,9 +278,9 @@ Cep::make('cep')
 #### Custom Error Message
 
 ```php
-Cep::make('cep')
+Cep::make('postal_code')
     ->errorMessage('Invalid CEP')
-    ->api(ViaCepProvider::class, function ($set, $response) {
+    ->api(ViaCepProvider::class, function (Set $set, ?array $response) {
         // ...
     })
 ```
@@ -294,11 +294,8 @@ Cep::make('cep')
 use Leandrocfe\FilamentPtbrFormFields\Providers\BrasilApiProvider;
 
 Cep::make('cep')
-    ->api(BrasilApiProvider::class, function ($set, $response) {
-        $set('street', $response['street'] ?? null);
-        $set('neighborhood', $response['neighborhood'] ?? null);
-        $set('city', $response['city'] ?? null);
-        $set('state', $response['state'] ?? null);
+    ->api(BrasilApiProvider::class, function (Set $set, ?array $response) {
+        // ...
     })
 ```
 
