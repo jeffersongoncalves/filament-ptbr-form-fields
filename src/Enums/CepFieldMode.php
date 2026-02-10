@@ -1,6 +1,6 @@
 <?php
 
-namespace Leandrocfe\FilamentPtbrFormFields;
+namespace Leandrocfe\FilamentPtbrFormFields\Enums;
 
 enum CepFieldMode: string
 {

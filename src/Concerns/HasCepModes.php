@@ -6,7 +6,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;
-use Leandrocfe\FilamentPtbrFormFields\CepFieldMode;
+use Leandrocfe\FilamentPtbrFormFields\Enums\CepFieldMode;
 use Leandrocfe\FilamentPtbrFormFields\Providers\CepProviderInterface;
 use Livewire\Component;
 
