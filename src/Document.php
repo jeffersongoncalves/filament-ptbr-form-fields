@@ -16,13 +16,11 @@ class Document extends TextInput
     {
         parent::setUp();
 
-        // 🔑 aqui acontece a mágica
         $this->dehydrateStateUsing(function (?string $state) {
             if (! $this->dehydrateMask || $state === null) {
                 return $state;
             }
 
-            // remove tudo que não for número
             return preg_replace('/\D/', '', $state);
         });
     }
@@ -43,7 +41,8 @@ class Document extends TextInput
         if ($condition) {
             $this->mask(RawJs::make(<<<'JS'
                 $input.length > 14 ? '99.999.999/9999-99' : '999.999.999-99'
-            JS))->minLength(14);
+            JS
+            ))->minLength(14);
         }
 
         return $this;
