@@ -16,6 +16,7 @@ composer require leandrocfe/filament-ptbr-form-fields:"^4.0"
 
 ### Filament V2 - if you are using Filament v2.x, you can use [this section](https://github.com/leandrocfe/filament-ptbr-form-fields/tree/2.0.0)
 ### Filament V3 - if you are using Filament v3.x, you can use [this section](https://github.com/leandrocfe/filament-ptbr-form-fields/tree/3.x)
+### Filament V4 - if you are using Filament v4.x, you can use [this section](https://github.com/leandrocfe/filament-ptbr-form-fields/tree/4.x)
 
 ## Usage
 
