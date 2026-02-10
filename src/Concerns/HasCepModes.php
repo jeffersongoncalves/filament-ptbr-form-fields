@@ -31,7 +31,6 @@ trait HasCepModes
         return match ($this->getMode()) {
             CepFieldMode::ON_BLUR => $this->configureOnBlurMode($provider, $callback),
             CepFieldMode::SUFFIX => $this->configureSuffixMode($provider, $callback),
-            default => $this,
         };
     }
 
