@@ -41,6 +41,11 @@ class Money extends TextInput
 
     public function currency(string|null|Closure $currency = BRL::class): static
     {
+
+        if ($currency instanceof Closure) {
+            $currency = $currency->call($this);
+        }
+
         $this->currency = new ($currency);
         currencies()->add($currency);
 
@@ -112,6 +117,7 @@ class Money extends TextInput
 
     protected function getOnKeyUp(): array
     {
+
         $currency = new ($this->getCurrency());
         $numberFormatter = $currency->locale;
 
