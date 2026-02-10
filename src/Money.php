@@ -23,13 +23,13 @@ class Money extends TextInput
         $this
             ->currency()
             ->prefix('R$')
-            ->extraAlpineAttributes(fn() => [
+            ->extraAlpineAttributes(fn () => [
                 ...$this->getOnKeyPress(),
                 ...$this->getOnKeyUp(),
                 ...$this->getOnBlur(),
             ])
-            ->formatStateUsing(fn($state) => $this->hydrateCurrency($state))
-            ->dehydrateStateUsing(fn($state) => $this->dehydrateCurrency($state));
+            ->formatStateUsing(fn ($state) => $this->hydrateCurrency($state))
+            ->dehydrateStateUsing(fn ($state) => $this->dehydrateCurrency($state));
     }
 
     public function initialValue(null|string|int|float|Closure $value = '0,00'): static
@@ -48,7 +48,6 @@ class Money extends TextInput
 
         $this->currency = new ($currency);
         currencies()->add($currency);
-
 
         if ($currency !== 'BRL') {
             $this->prefix(null);
@@ -124,7 +123,7 @@ class Money extends TextInput
 
         return [
             'x-on:keyup' => 'function() {
-                $el.value = Currency.masking($el.value, {locales:\'' . $numberFormatter . '\'});
+                $el.value = Currency.masking($el.value, {locales:\''.$numberFormatter.'\'});
             }',
         ];
     }
@@ -133,7 +132,7 @@ class Money extends TextInput
     {
         return [
             'x-on:blur' => 'function() {
-                $wire.set(\'' . $this->getStatePath() . '\', $el.value);
+                $wire.set(\''.$this->getStatePath().'\', $el.value);
             }',
         ];
     }
