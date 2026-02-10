@@ -10,6 +10,30 @@ class Document extends TextInput
 {
     public bool $validation = true;
 
+    protected bool $dehydrateMask = false;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // 🔑 aqui acontece a mágica
+        $this->dehydrateStateUsing(function (?string $state) {
+            if (! $this->dehydrateMask || $state === null) {
+                return $state;
+            }
+
+            // remove tudo que não for número
+            return preg_replace('/\D/', '', $state);
+        });
+    }
+
+    public function dehydrateMask(bool $condition = true): static
+    {
+        $this->dehydrateMask = $condition;
+
+        return $this;
+    }
+
     public function dynamic(bool $condition = true): static
     {
         if (self::getValidation()) {
