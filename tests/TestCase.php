@@ -23,6 +23,7 @@ class TestCase extends Orchestra
             \Livewire\LivewireServiceProvider::class,
             \Filament\Support\SupportServiceProvider::class,
             \Filament\Forms\FormsServiceProvider::class,
+            \LaravelLegends\PtBrValidator\ValidatorProvider::class,
             FilamentPtbrFormFieldsServiceProvider::class,
         ];
     }
